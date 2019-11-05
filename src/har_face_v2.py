@@ -1,5 +1,6 @@
 # coding=utf-8
 """Face Detection and Recognition"""
+from sklearn.metrics.pairwise import cosine_similarity
 import json
 import cv2
 import numpy as np
@@ -33,6 +34,7 @@ class Face:
         self.container_image = None
         self.embedding = None
         self.timestamp = None
+        self.similarity = None
 
 
 class Recognition:
@@ -40,6 +42,7 @@ class Recognition:
         self.detect = Detection()
         self.encoder = Encoder()
         self.identifier = Identifier()
+        self.prev_face = None
 
     def add_identity(self, image, person_name):
         faces = self.detect.find_faces(image)
@@ -50,7 +53,7 @@ class Recognition:
             face.embedding = self.encoder.generate_embedding(face)
             return faces
 
-    def identify(self, image):
+    def identify(self, image, prev_faces):
         faces = self.detect.find_faces(image)
         faces = self.detect.predictAge(faces)
         faces = self.detect.predictGender(faces)
@@ -59,7 +62,7 @@ class Recognition:
             if debug:
                 cv2.imshow("Face: " + str(i), face.image)
             face.embedding = self.encoder.generate_embedding(face)
-            face.name = self.identifier.identify(face)
+            face.name = self.identifier.identify(face, prev_faces)
         return faces
 
 
@@ -68,23 +71,76 @@ class Identifier:
         with open(embedding_path, 'r') as infile:
             self.base_emb = json.load(infile)
 
-    def identify(self, face):
+    def identify(self, face, prev_faces):
         if face.embedding is not None:
             min_dist = 100
 
             for (name, db_emb) in self.base_emb.items():
-                dist = np.linalg.norm(face.embedding - np.array(db_emb))
+                # dist = np.linalg.norm(face.embedding - np.array(db_emb))
+                # dist = np.sum(abs(face.embedding - np.array(db_emb)))
+                dist, alpha = self.L2Distance(face.embedding, np.array(db_emb))
+                # dist, alpha = self.consineDistance(face.embedding, np.array(db_emb))
+                # dist, alpha = self.L1Distance(face.embedding, np.array(db_emb))
 
                 if dist < min_dist:
                     min_dist = dist
                     identity = name
 
-            if min_dist > 1.06:
-                identity = "Unknown"
-            face.timestamp = datetime.datetime.now()
-            print("Identity: {} L2 Distance: {}".format(identity, min_dist))
+            if min_dist < alpha:
+                print("Identity: {} L2 Distance: {}".format(identity, min_dist))
+                face.timestamp = datetime.datetime.now()
+                face.similarity = min_dist
+                return identity
 
+            elif min_dist > alpha:
+                if len(prev_faces) == 0:
+                    identity = 'Unknown'
+                elif len(prev_faces) > 0:
+                    face_centroid = self.bb_centroid(face)
+                    for prev_face in prev_faces:
+                        prev_face_centroid = self.bb_centroid(prev_face)
+                        centroid_dist = self.dist_centroid(face_centroid,
+                                                           prev_face_centroid)
+                        threshold = self.get_threshold(prev_face)
+
+                        if centroid_dist < threshold:
+                            identity = prev_face.name
+                            break
+                        else:
+                            identity = "Unknown"
+                            break
+
+            face.timestamp = datetime.datetime.now()
+            face.similarity = min_dist
+
+            print("Identity: {} L2 Distance: {}".format(identity, min_dist))
             return identity
+
+    def bb_centroid(self, face):
+        x = face.bounding_box[0] + face.bounding_box[2]//2
+        y = face.bounding_box[1] + face.bounding_box[3]//3
+        return (x, y)
+
+    def dist_centroid(self, c1, c2):
+        x1, y1 = c1[0], c1[1]
+        x2, y2 = c2[0], c2[1]
+        return np.sqrt((x1-x2)**2 + (y1-y2)**2)
+
+    def get_threshold(self, t_face):
+        w = t_face.bounding_box[2]
+        h = t_face.bounding_box[3]
+        return 0.75 * np.sqrt((w/2)**2 + (h/2)**2)
+
+    def L2Distance(self, v1, v2):
+        return np.linalg.norm(v1 - v2), 1.10
+
+    def L1Distance(self, v1, v2):
+        return np.sum(abs(v1 - v2)), 20
+
+    def consineDistance(self, v1, v2):
+        v1 = v1.reshape(1, len(v1))
+        v2 = v2.reshape(1, len(v2))
+        return cosine_similarity(v1, v2)[0][0], 1.10
 
 
 class Encoder:

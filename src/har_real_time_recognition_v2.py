@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 import datetime
+import numpy as np
 import os
 import cv2
 import har_face_v2
@@ -88,6 +89,7 @@ def main(args):
         wr.writerow(['Time', 'Identified_Person', 'Age', 'Gender'])
 
     prev_faces = []
+    last_faces = []
 
     start_time = time.time()
     start_time_data = time.time()
@@ -97,8 +99,9 @@ def main(args):
         ret, frame = video_capture.read()
 
         if (frame_count % frame_interval) == 0:
-
-            faces = face_recognition.identify(frame)
+            if len(faces) > 0:
+                last_faces = copy.deepcopy(faces)
+            faces = face_recognition.identify(frame, last_faces)
 
             # check current fps
             end_time = time.time()
@@ -106,11 +109,6 @@ def main(args):
                 frame_rate = int(frame_count / (end_time - start_time))
                 start_time = time.time()
                 frame_count = 0
-
-        add_overlays(frame, faces, frame_rate)
-
-        frame_count += 1
-        cv2.imshow('Video', frame)
 
         if len(prev_faces) == 0:
             prev_faces = copy.deepcopy(faces)
@@ -122,11 +120,12 @@ def main(args):
             for face in faces:
                 for prev_face in prev_faces:
                     if face.name == prev_face.name and face.name == 'Unknown':
-                        if ((face.timestamp - prev_face.timestamp).total_seconds() > 10):
+                        # if np.linalg.norm(face.embedding - prev_face.embedding) < 1.10
+                        if ((face.timestamp - prev_face.timestamp).total_seconds() > 15):
                             face_data.append(face)
                             prev_face.timestamp = datetime.datetime.now()
 
-                    elif face.name == prev_face.name:
+                    elif face.name == prev_face.name and face.name != 'Unknown':
                         if ((face.timestamp - prev_face.timestamp).total_seconds() > 60):
                             face_data.append(face)
                             prev_face.timestamp = datetime.datetime.now()
@@ -134,6 +133,10 @@ def main(args):
                 if face.name not in [f.name for f in prev_faces]:
                     face_data.append(face)
                     prev_faces.append(face)
+
+        add_overlays(frame, faces, frame_rate)
+        frame_count += 1
+        cv2.imshow('Video', frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
