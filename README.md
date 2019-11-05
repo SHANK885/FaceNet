@@ -47,11 +47,11 @@
 ### Where the image is stored ?
 
   * The raw images of all the enrolled members is stored in:
-    FaceNet/database/raw_images/<name> [directory](https://github.com/gyrusai/FaceNet/tree/master/database/raw_images)
+    [FaceNet/database/raw_images/<name> directory](https://github.com/gyrusai/FaceNet/tree/master/database/raw_images)
   * The cropped and alligned faces of all te enrolled members is stored in:
-    FaceNet/database/cropped_faces/<name> [directory](https://github.com/gyrusai/FaceNet/tree/master/database/cropped_faces)
+    [FaceNet/database/cropped_faces/<name> directory](https://github.com/gyrusai/FaceNet/tree/master/database/cropped_faces)
   * The embeddings of all the enrolled faces is present in:
-    FaceNet/database/embeddings/<emb> [directory](https://github.com/gyrusai/FaceNet/tree/master/database/embeddings)
+    [FaceNet/database/embeddings/<emb> directory](https://github.com/gyrusai/FaceNet/tree/master/database/embeddings)
 
 ### FaceNet Realtime: What is does?
 
