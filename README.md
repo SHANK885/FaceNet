@@ -18,9 +18,9 @@
 
 ### Setup
 
-  * Clone this [repository](https://github.com/gyrusai/FaceNet/archive/master.zip).
-  * Download the [models.zip](https://drive.google.com/open?id=1LfsMvRRdiWvjgWS8Ufw_Q8RXmwrUcncj).
-  * Downlaod the [age_gender.zip](https://drive.google.com/open?id=1aFQGU1FoBwW6qsdMvjFqdEsq7rboCo-r).
+  * Clone this [repository](https://github.com/gyrusai/FaceNet/archive/master.zip)
+  * Download the [models.zip](https://drive.google.com/open?id=1LfsMvRRdiWvjgWS8Ufw_Q8RXmwrUcncj)
+  * Downlaod the [age_gender.zip](https://drive.google.com/open?id=1aFQGU1FoBwW6qsdMvjFqdEsq7rboCo-r)
   * Unzip both **models.zip** and **age_gender.zip** inside the FaceNet directory.
   
 ### Enroll a new face using webcam?
