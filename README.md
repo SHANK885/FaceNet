@@ -62,7 +62,7 @@ Our facenet realtime is able to recognize the faces of all the members that is e
 
   * Enroll the faces you want by following the above steps.
   * Go to the FaceNet/src directory.
-  * run *har_real_time_recognition_v2.py.
+  * run har_real_time_recognition_v2.py.
   * It will be able to recognize the faceq that are present in the database and will mark a face unknown if it is not             registered.
 
 ### How to recognize faces stored in the FaceNet/database/test_data directory ?
