@@ -1,0 +1,85 @@
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ python enroll_face.py test
+*****Initializing face enrollment*****
+
+Face Captured for: test
+Press 'C' to confirm this image
+Press 'R' to retake the picture
+
+Enter Your Response: c
+
+Image finalized
+
+2019-10-24 12:47:48.919413: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+../models/20180402-114759
+../models/20180402-114759
+Model directory: ../models/20180402-114759
+Metagraph file: model-20180402-114759.meta
+Checkpoint file: model-20180402-114759.ckpt-275
+Traceback (most recent call last):
+  File "enroll_face.py", line 218, in <module>
+    main(parse_arguments(sys.argv[1:]))
+  File "enroll_face.py", line 83, in main
+    embedding = encoder.generate_embedding(aligned_face)
+  File "enroll_face.py", line 188, in generate_embedding
+    return self.sess.run(embeddings, feed_dict=feed_dict)[0]
+  File "/home/gyrus1/anaconda3/envs/facenet/lib/python3.5/site-packages/tensorflow/python/client/session.py", line 905, in run
+    run_metadata_ptr)
+  File "/home/gyrus1/anaconda3/envs/facenet/lib/python3.5/site-packages/tensorflow/python/client/session.py", line 1116, in _run
+    str(subfeed_t.get_shape())))
+ValueError: Cannot feed value of shape (1, 480, 640, 3) for Tensor 'input:0', which has shape '(?, 160, 160, 3)'
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ python enroll_face.py test
+*****Initializing face enrollment*****
+
+Face Captured for: test
+Press 'C' to confirm this image
+Press 'R' to retake the picture
+
+Enter Your Response: c
+
+Image finalized
+
+2019-10-24 12:48:40.783923: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+../models/20180402-114759
+../models/20180402-114759
+Model directory: ../models/20180402-114759
+Metagraph file: model-20180402-114759.meta
+Checkpoint file: model-20180402-114759.ckpt-275
+Traceback (most recent call last):
+  File "enroll_face.py", line 218, in <module>
+    main(parse_arguments(sys.argv[1:]))
+  File "enroll_face.py", line 83, in main
+    embedding = encoder.generate_embedding(aligned_face)
+  File "enroll_face.py", line 188, in generate_embedding
+    return self.sess.run(embeddings, feed_dict=feed_dict)[0]
+  File "/home/gyrus1/anaconda3/envs/facenet/lib/python3.5/site-packages/tensorflow/python/client/session.py", line 905, in run
+    run_metadata_ptr)
+  File "/home/gyrus1/anaconda3/envs/facenet/lib/python3.5/site-packages/tensorflow/python/client/session.py", line 1116, in _run
+    str(subfeed_t.get_shape())))
+ValueError: Cannot feed value of shape (1, 480, 640, 3) for Tensor 'input:0', which has(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ 
+
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ 
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ 
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ 
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ 
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ python enroll_face.py test
+*****Initializing face enrollment*****
+
+Face Captured for: test
+Press 'C' to confirm this image
+Press 'R' to retake the picture
+
+Enter Your Response: c
+
+Image finalized
+
+2019-10-24 13:16:50.834054: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+../models/20180402-114759
+../models/20180402-114759
+Model directory: ../models/20180402-114759
+Metagraph file: model-20180402-114759.meta
+Checkpoint file: model-20180402-114759.ckpt-275
+Embedding Shape:  512
+embedding written
+face enrolled with name => test
+(facenet) gyrus1@gyrus1:~/Desktop/Gyrus/FaceNet/src$ 
+
