@@ -85,6 +85,8 @@ class Identifier:
                 if dist < min_dist:
                     min_dist = dist
                     identity = name
+            if min_dist > alpha:
+                identity = "Unknown"
 
             if min_dist < alpha:
                 print("Identity: {} L2 Distance: {}".format(identity, min_dist))
@@ -97,11 +99,21 @@ class Identifier:
                     identity = 'Unknown'
                 elif len(prev_faces) > 0:
                     face_centroid = self.bb_centroid(face)
+
+                    print("")
+                    print("original identity: ", identity)
+                    print("Min L2 distance: ", min_dist)
+                    print("face_centroid: ", face_centroid)
+
                     for prev_face in prev_faces:
                         prev_face_centroid = self.bb_centroid(prev_face)
                         centroid_dist = self.dist_centroid(face_centroid,
                                                            prev_face_centroid)
                         threshold = self.get_threshold(prev_face)
+
+                        print("prev_face_centroid: ", prev_face_centroid)
+                        print("centroid_dist: ", centroid_dist)
+                        print("threshold: ", threshold)
 
                         if centroid_dist < threshold:
                             identity = prev_face.name
@@ -110,11 +122,13 @@ class Identifier:
                             identity = "Unknown"
                             break
 
-            face.timestamp = datetime.datetime.now()
-            face.similarity = min_dist
+                face.timestamp = datetime.datetime.now()
+                face.similarity = min_dist
 
-            print("Identity: {} L2 Distance: {}".format(identity, min_dist))
-            return identity
+                print("final indentity: ", identity)
+                print("Identity: {} L2 Distance: {}".format(identity, min_dist))
+                print("")
+                return identity
 
     def bb_centroid(self, face):
         x = face.bounding_box[0] + face.bounding_box[2]//2
@@ -140,7 +154,7 @@ class Identifier:
     def consineDistance(self, v1, v2):
         v1 = v1.reshape(1, len(v1))
         v2 = v2.reshape(1, len(v2))
-        return cosine_similarity(v1, v2)[0][0], 1.10
+        return 1 / (1 + cosine_similarity(v1, v2)[0][0]), 0.6
 
 
 class Encoder:
