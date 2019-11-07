@@ -1,7 +1,6 @@
 '''
 Perform face detection in real-time using webcam
 '''
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -60,7 +59,7 @@ def add_overlays(frame, faces, frame_rate):
                 (0, 255, 0),
                 thickness=2,
                 lineType=2)
-
+    return frame
 
 def main(args):
 
@@ -70,6 +69,10 @@ def main(args):
     fps_display_interval = 5    # second
     frame_rate = 0
     frame_count = 0
+    faces = []
+    face_data = []
+    prev_faces = []
+    last_faces = []
 
     video_capture = cv2.VideoCapture(0)
     face_recognition = har_face_v2.Recognition()
@@ -78,9 +81,6 @@ def main(args):
         # print("Debug Enabled")
         har_face_v2.debug = True
 
-    faces = []
-    face_data = []
-
     if not os.path.exists('../output/'):
         os.makedirs('../output/')
 
@@ -88,15 +88,13 @@ def main(args):
         wr = csv.writer(f, quoting=csv.QUOTE_ALL)
         wr.writerow(['Time', 'Identified_Person', 'Age', 'Gender'])
 
-    prev_faces = []
-    last_faces = []
-
     start_time = time.time()
     start_time_data = time.time()
 
     while True:
-        # capture frame-by-frame
-        ret, frame = video_capture.read()
+        # capture frame
+        if video_capture.isOpened():
+            ret, frame = video_capture.read()
 
         if (frame_count % frame_interval) == 0:
             if len(faces) > 0:
@@ -109,6 +107,13 @@ def main(args):
                 frame_rate = int(frame_count / (end_time - start_time))
                 start_time = time.time()
                 frame_count = 0
+        if len(faces) > 0:
+            frame = add_overlays(frame, faces, frame_rate)
+        frame_count += 1
+        cv2.imshow('Realtime Recognition', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
         if len(prev_faces) == 0:
             prev_faces = copy.deepcopy(faces)
@@ -116,30 +121,9 @@ def main(args):
                 face_data.append(face)
             continue
 
-        if len(prev_faces) > 0 and len(faces) > 0:
-            for face in faces:
-                for prev_face in prev_faces:
-                    if face.name == prev_face.name and face.name == 'Unknown':
-                        # if np.linalg.norm(face.embedding - prev_face.embedding) < 1.10
-                        if ((face.timestamp - prev_face.timestamp).total_seconds() > 15):
-                            face_data.append(face)
-                            prev_face.timestamp = datetime.datetime.now()
-
-                    elif face.name == prev_face.name and face.name != 'Unknown':
-                        if ((face.timestamp - prev_face.timestamp).total_seconds() > 60):
-                            face_data.append(face)
-                            prev_face.timestamp = datetime.datetime.now()
-
-                if face.name not in [f.name for f in prev_faces]:
-                    face_data.append(face)
-                    prev_faces.append(face)
-
-        add_overlays(frame, faces, frame_rate)
-        frame_count += 1
-        cv2.imshow('Video', frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        face_data, prev_faces = get_detected_faces(faces,
+                                                   prev_faces,
+                                                   face_data)
 
         if (time.time() - start_time_data) > 900:
             with open("../output/face_data.csv", 'a', newline='') as f:
@@ -161,6 +145,54 @@ def main(args):
             ti = '{:%Y-%m-%d %H:%M:%S}'.format(face.timestamp)
             face_info = [ti, face.name, face.age, face.gender]
             wr.writerow(face_info)
+
+
+def get_detected_faces(faces, prev_faces, face_data):
+    if len(prev_faces) > 0 and len(faces) > 0:
+        for face in faces:
+            for prev_face in prev_faces:
+                time_delta = face.timestamp - prev_face.timestamp
+                if face.name == prev_face.name and face.name == 'Unknown':
+                    l2_dist = np.linalg.norm(face.embedding - prev_face.embedding)
+                    # face_centroid = bb_centroid(face)
+                    # prev_face_centroid = bb_centroid(prev_face)
+                    centroid_dist = dist_centroid(bb_centroid(face),
+                                                  bb_centroid(prev_face))
+                    threshold = get_threshold(prev_face)
+
+                    if l2_dist < 1.10 and centroid_dist < threshold:
+                        if (time_delta.total_seconds() > 60):
+                            face_data.append(face)
+                        prev_face.timestamp = datetime.datetime.now()
+
+                elif face.name == prev_face.name and face.name != 'Unknown':
+                    if (time_delta.total_seconds() > 60):
+                        face_data.append(face)
+                    prev_face.timestamp = datetime.datetime.now()
+
+            if face.name not in [f.name for f in prev_faces]:
+                face_data.append(face)
+                prev_faces.append(face)
+
+    return face_data, prev_faces
+
+
+def bb_centroid(face):
+    x = face.bounding_box[0] + face.bounding_box[2]//2
+    y = face.bounding_box[1] + face.bounding_box[3]//3
+    return (x, y)
+
+
+def dist_centroid(c1, c2):
+    x1, y1 = c1[0], c1[1]
+    x2, y2 = c2[0], c2[1]
+    return np.sqrt((x1-x2)**2 + (y1-y2)**2)
+
+
+def get_threshold(t_face):
+    w = t_face.bounding_box[2]
+    h = t_face.bounding_box[3]
+    return 0.75 * np.sqrt((w/2)**2 + (h/2)**2)
 
 
 def parse_arguments(argv):
