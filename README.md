@@ -14,7 +14,6 @@
   * Python==3.5.6
   * OpenCV==4.1.1
   * NumPy==1.14.2
-  * SciPy==1.3.0
 
 ### Setup
 
@@ -23,7 +22,7 @@
   * Downlaod the [age_gender.zip](https://drive.google.com/open?id=1aFQGU1FoBwW6qsdMvjFqdEsq7rboCo-r)
   * Unzip both **models.zip** and **age_gender.zip** inside the FaceNet directory.
   
-### Enroll a new face using webcam?
+### Enroll a new face using webcam.
 
   1. Go to the FaceNet/src directory.
   2. run "python enroll_face.py <name_of_new_member>
@@ -40,7 +39,7 @@
   The cropped and aligned face will be saved to:
         FaceNet/database/cropped_faces/<name_of_new_member> directory
   
-  The 512 D face embedding will be appended to:
+  The 512 D face embedding will be added to:
         FaceNet/database/embeddings/face_embeddings.json
 
 
@@ -55,15 +54,16 @@
 
 ### FaceNet Realtime: What is does?
 
-Our facenet realtime is able to recognize the faces of all the members that is enrolled in the database. However, if a face is not enrolled it will make it as unknown.
+Our facenet realtime is able to recognize the faces of all the members that is enrolled in the database. However, if a face is not enrolled it will make it as unknown.It is also able to predict the gender and age of the detected faces in the realtime video stream.
 
 
-### How to run realtime recognition.
+### How to run FaceNet Realtime Recognition.
 
   * Enroll the faces you want by following the above steps.
   * Go to the FaceNet/src directory.
   * run har_real_time_recognition_v2.py.
-  * It will be able to recognize the faceq that are present in the database and will mark a face unknown if it is not             registered.
+  * It will be able to recognize the faces that are present in the database and will mark a face unknown if it is not             registered.
+  * All the detected faces and its predicted age, gender as well as detection time is stored in output/face_data.csv
 
 ### How to recognize faces stored in the FaceNet/database/test_data directory ?
 
