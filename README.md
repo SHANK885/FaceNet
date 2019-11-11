@@ -26,8 +26,8 @@
 
   1. Go to the FaceNet/src directory.
   2. run "python enroll_face.py <name_of_new_member>
-  3. Web cam will oen up with a window to capture face.
-  4. Press s by selectiong the video window to capture the image.
+  3. Webcam will open up with a window to capture face.
+  4. Press 's' by selectiong the video window to capture the image.
   5. If you want to recapture the image:
         select the terminal window and enter "R" or "r" else enter "C" or "c".
 
@@ -39,7 +39,7 @@
   The cropped and aligned face will be saved to:
         FaceNet/database/cropped_faces/<name_of_new_member> directory
   
-  The 512 D face embedding will be added to:
+  The 512 D face embedding vector will be added to:
         FaceNet/database/embeddings/face_embeddings.json
 
 
