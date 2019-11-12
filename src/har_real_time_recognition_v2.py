@@ -20,33 +20,62 @@ def add_overlays(frame, faces, frame_rate):
 
     if faces is not None:
         for id_face in faces:
+
+            name_gender = '%s %s' % (id_face.name, id_face.gender)
+            age = 'Age: %s Yr.' % (id_face.age)
             face_bb = id_face.bounding_box.astype(int)
+
             if id_face.name == 'Unknown':
                 box_color = (0, 0, 255)
                 text_color = (0, 0, 255)
             else:
                 box_color = (0, 255, 0)
-                text_color = (255, 0, 0)
+                text_color = (255, 10, 0)
 
             cv2.rectangle(frame,
                           (face_bb[0], face_bb[1]),
                           (face_bb[2], face_bb[3]),
                           box_color,
                           2)
+
+            labelSize_n, baseLine_n = cv2.getTextSize(name_gender,
+                                                      cv2.FONT_HERSHEY_SIMPLEX,
+                                                      0.7,
+                                                      2)
+            label_ymin_n = max(face_bb[1], labelSize_n[1] + 10)
+
+            cv2.rectangle(frame,
+                          (face_bb[0], label_ymin_n-labelSize_n[1]-10),
+                          (face_bb[0]+labelSize_n[0], label_ymin_n+baseLine_n-10),
+                          (255, 255, 255),
+                          cv2.FILLED)
+
+            labelSize_a, baseLine_a = cv2.getTextSize(age,
+                                                      cv2.FONT_HERSHEY_SIMPLEX,
+                                                      0.7,
+                                                      2)
+            label_ymin_a = max(face_bb[3], labelSize_a[1] - 10)
+
+            cv2.rectangle(frame,
+                          (face_bb[0], label_ymin_a-labelSize_a[1]-10),
+                          (face_bb[0]+labelSize_a[0], label_ymin_a+baseLine_a-10),
+                          (255, 255, 255),
+                          cv2.FILLED)
+
             if id_face.name is not None:
                 cv2.putText(frame,
-                            id_face.name+" "+id_face.gender,
-                            (face_bb[0], face_bb[3]),
+                            name_gender,
+                            (face_bb[0], label_ymin_n-7),
                             cv2.FONT_HERSHEY_SIMPLEX,
-                            0.75,
+                            0.70,
                             text_color,
                             thickness=2,
                             lineType=2)
                 cv2.putText(frame,
-                            "Age: " + id_face.age + " Yrs",
-                            (face_bb[0], face_bb[1]),
+                            age,
+                            (face_bb[0], label_ymin_a-7),
                             cv2.FONT_HERSHEY_SIMPLEX,
-                            0.75,
+                            0.70,
                             text_color,
                             thickness=2,
                             lineType=2)
@@ -61,8 +90,8 @@ def add_overlays(frame, faces, frame_rate):
                 lineType=2)
     return frame
 
-def main(args):
 
+def main(args):
     # number of frame after which to run face detection
     frame_interval = 3
 
@@ -75,6 +104,9 @@ def main(args):
     last_faces = []
 
     video_capture = cv2.VideoCapture(0)
+    video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+    video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)
+
     face_recognition = har_face_v2.Recognition()
 
     if args.debug:

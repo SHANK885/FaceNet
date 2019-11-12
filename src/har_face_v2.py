@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Face Detection and Recognition"""
+"""Face Detection and Recognition Utilities"""
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 import cv2
@@ -10,7 +10,6 @@ import datetime
 
 
 gpu_memory_fraction = 1.0
-
 facenet_model_checkpoint = "../models/20180402-114759"
 embedding_path = "../database/embeddings/face_embeddings.json"
 face_detector_path = "../classifiers/haarcascade_frontalface_default.xml"
@@ -19,7 +18,6 @@ age_prot_path = "../age_gender/deploy_age.prototxt"
 age_caffe_path = "../age_gender/age_net.caffemodel"
 gender_prot_path = "../age_gender/deploy_gender.prototxt"
 gender_caffe_path = "../age_gender/gender_net.caffemodel"
-
 
 debug = False
 
@@ -78,9 +76,9 @@ class Identifier:
             for (name, db_emb) in self.base_emb.items():
                 # dist = np.linalg.norm(face.embedding - np.array(db_emb))
                 # dist = np.sum(abs(face.embedding - np.array(db_emb)))
-                dist, alpha = self.L2Distance(face.embedding, np.array(db_emb))
                 # dist, alpha = self.consineDistance(face.embedding, np.array(db_emb))
                 # dist, alpha = self.L1Distance(face.embedding, np.array(db_emb))
+                dist, alpha = self.L2Distance(face.embedding, np.array(db_emb))
 
                 if dist < min_dist:
                     min_dist = dist
@@ -89,7 +87,7 @@ class Identifier:
                 identity = "Unknown"
 
             if min_dist < alpha:
-                print("Identity: {} L2 Distance: {}".format(identity, min_dist))
+                print("Identity: {} Similarity: {}".format(identity, min_dist))
                 face.timestamp = datetime.datetime.now()
                 face.similarity = min_dist
                 return identity
@@ -126,7 +124,7 @@ class Identifier:
                 face.similarity = min_dist
 
                 print("final indentity: ", identity)
-                print("Identity: {} L2 Distance: {}".format(identity, min_dist))
+                print("Identity: {} Similarity: {}".format(identity, min_dist))
                 print("")
                 return identity
 
@@ -172,7 +170,8 @@ class Encoder:
         prewhiten_face = facenet.prewhiten(face.image)
 
         # Run forward pass to calculate embeddings
-        feed_dict = {images_placeholder: [prewhiten_face], phase_train_placeholder: False}
+        feed_dict = {images_placeholder: [prewhiten_face],
+                     phase_train_placeholder: False}
         return self.sess.run(embeddings, feed_dict=feed_dict)[0]
 
 
@@ -194,13 +193,13 @@ class Detection:
 
     def get_boundding_box(self, image, minsize, factor):
         bounding_box = []
-
+        # convert image to grayscale
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         faces = self.face_detector.detectMultiScale(gray,
                                                     scaleFactor=factor,
                                                     minNeighbors=5,
                                                     minSize=(30, 30))
-
+        # check for detected eye
         for (x, y, w, h) in faces:
             roi_frame = image[y:y+h, x:x+w]
             eyes = self.eye_detector.detectMultiScale(roi_frame)
@@ -227,11 +226,9 @@ class Detection:
             face.bounding_box[3] = np.minimum(bb[1] + bb[3] + self.face_crop_margin / 2, img_size[0])
 
             cropped = image[face.bounding_box[1]:face.bounding_box[3], face.bounding_box[0]:face.bounding_box[2], :]
-
             face.image = cv2.resize(cropped,
                                     (self.face_crop_size, self.face_crop_size),
                                     interpolation=cv2.INTER_LINEAR)
-
             faces.append(face)
 
         return faces
@@ -259,7 +256,6 @@ class Detection:
                                          swapRB=False)
             self.age_net.setInput(blob)
             age_preds = self.age_net.forward()
-            # print("age_preds", age_preds)
             age = self.age_list[age_preds[0].argmax()]
             face.age = age
         return faces
